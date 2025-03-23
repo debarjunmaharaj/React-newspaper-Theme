@@ -1,133 +1,153 @@
 
 import { Link } from 'react-router-dom';
 import { useSite } from '@/context/SiteContext';
-import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react';
 
 export const Footer = () => {
-  const { siteSettings, menuItems, pages } = useSite();
-  const currentYear = new Date().getFullYear();
-
+  const { categories, pages, menuItems, siteSettings } = useSite();
+  
+  // Filter menu items by location
+  const footerLinks = menuItems.filter(item => item.location === 'footer');
+  const socialLinks = menuItems.filter(item => item.location === 'social');
+  
   return (
-    <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-10">
-      <div className="news-container py-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {/* Brand and About */}
-          <div className="col-span-1 md:col-span-1 lg:col-span-1">
-            <h3 className="font-heading font-bold text-xl mb-4 text-gray-900 dark:text-white">
-              {siteSettings.title}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              {siteSettings.description}
-            </p>
-            <div className="flex space-x-4 mt-4">
-              {siteSettings.social.facebook && (
-                <a 
-                  href={siteSettings.social.facebook} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                >
-                  <Facebook size={20} />
-                  <span className="sr-only">Facebook</span>
-                </a>
-              )}
-              {siteSettings.social.twitter && (
-                <a 
-                  href={siteSettings.social.twitter} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                >
-                  <Twitter size={20} />
-                  <span className="sr-only">Twitter</span>
-                </a>
-              )}
-              {siteSettings.social.instagram && (
-                <a 
-                  href={siteSettings.social.instagram} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                >
-                  <Instagram size={20} />
-                  <span className="sr-only">Instagram</span>
-                </a>
-              )}
-              {siteSettings.social.linkedin && (
-                <a 
-                  href={siteSettings.social.linkedin} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                >
-                  <Linkedin size={20} />
-                  <span className="sr-only">LinkedIn</span>
-                </a>
-              )}
+    <footer>
+      {/* Pre-Footer Ad */}
+      <div className="w-full bg-gray-200 h-24 flex items-center justify-center text-gray-500 border-t border-b">
+        Advertisement Banner 970x90
+      </div>
+      
+      {/* Main Footer */}
+      <div className="bg-neutral-800 text-gray-300 py-8">
+        <div className="news-container">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Column 1: About */}
+            <div>
+              <h3 className="font-bold text-white text-lg mb-4 border-b border-red-600 pb-2">ABOUT US</h3>
+              <div className="space-y-3">
+                <p className="text-sm leading-relaxed">
+                  {siteSettings.description}
+                </p>
+                <div className="flex items-center text-sm">
+                  <MapPin className="h-4 w-4 mr-2 text-red-500" />
+                  <span>123 News Street, City, Country</span>
+                </div>
+                <div className="flex items-center text-sm">
+                  <Phone className="h-4 w-4 mr-2 text-red-500" />
+                  <span>+1-234-567-8900</span>
+                </div>
+                <div className="flex items-center text-sm">
+                  <Mail className="h-4 w-4 mr-2 text-red-500" />
+                  <span>info@dailyexpress.com</span>
+                </div>
+                <div className="flex space-x-2 pt-2">
+                  <a href="#" className="bg-neutral-700 hover:bg-red-600 transition-colors p-2 rounded-full">
+                    <Facebook className="h-4 w-4" />
+                  </a>
+                  <a href="#" className="bg-neutral-700 hover:bg-red-600 transition-colors p-2 rounded-full">
+                    <Twitter className="h-4 w-4" />
+                  </a>
+                  <a href="#" className="bg-neutral-700 hover:bg-red-600 transition-colors p-2 rounded-full">
+                    <Instagram className="h-4 w-4" />
+                  </a>
+                  <a href="#" className="bg-neutral-700 hover:bg-red-600 transition-colors p-2 rounded-full">
+                    <Youtube className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
+            </div>
+            
+            {/* Column 2: Categories */}
+            <div>
+              <h3 className="font-bold text-white text-lg mb-4 border-b border-red-600 pb-2">CATEGORIES</h3>
+              <ul className="space-y-2">
+                {categories.slice(0, 8).map(category => (
+                  <li key={category.id}>
+                    <Link 
+                      to={`/category/${category.slug}`}
+                      className="text-sm hover:text-red-500 transition-colors flex items-center"
+                    >
+                      <span className="text-red-500 mr-2">›</span>
+                      {category.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            {/* Column 3: Popular News */}
+            <div>
+              <h3 className="font-bold text-white text-lg mb-4 border-b border-red-600 pb-2">POPULAR NEWS</h3>
+              <div className="space-y-4">
+                {/* We'll use some of the existing categories as placeholders for popular news */}
+                {categories.slice(0, 3).map(category => (
+                  <Link 
+                    key={category.id} 
+                    to={`/category/${category.slug}`} 
+                    className="block group"
+                  >
+                    <div className="font-semibold text-sm group-hover:text-red-500 transition-colors">
+                      {category.name}: Latest updates and breaking news
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">Jan 01, 2023</div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+            
+            {/* Column 4: Newsletter */}
+            <div>
+              <h3 className="font-bold text-white text-lg mb-4 border-b border-red-600 pb-2">NEWSLETTER</h3>
+              <p className="text-sm mb-4">
+                Subscribe to our newsletter and get our latest news delivered directly to your inbox.
+              </p>
+              <form>
+                <div className="flex flex-col space-y-2">
+                  <input
+                    type="email"
+                    placeholder="Your Email"
+                    className="bg-neutral-700 text-white text-sm px-4 py-2 rounded-sm focus:outline-none focus:ring-1 focus:ring-red-500"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-red-600 text-white px-4 py-2 rounded-sm text-sm font-medium hover:bg-red-700 transition-colors"
+                  >
+                    SUBSCRIBE
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-
-          {/* Categories */}
-          <div className="col-span-1">
-            <h3 className="font-heading font-bold text-xl mb-4 text-gray-900 dark:text-white">Categories</h3>
-            <ul className="space-y-2">
-              {menuItems
-                .filter(item => item.url.includes('/category/'))
-                .slice(0, 6)
-                .map(item => (
+        </div>
+      </div>
+      
+      {/* Bottom Footer */}
+      <div className="bg-neutral-900 text-gray-400 py-4">
+        <div className="news-container">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-sm">
+              {siteSettings.footerText || `© ${new Date().getFullYear()} ${siteSettings.title}. All Rights Reserved.`}
+            </div>
+            <div>
+              <ul className="flex flex-wrap gap-4 text-xs">
+                <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
+                {footerLinks.map(item => (
                   <li key={item.id}>
-                    <Link 
-                      to={item.url} 
-                      className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-                    >
+                    <Link to={item.url} className="hover:text-white transition-colors">
                       {item.label}
                     </Link>
                   </li>
                 ))}
-            </ul>
-          </div>
-
-          {/* Pages */}
-          <div className="col-span-1">
-            <h3 className="font-heading font-bold text-xl mb-4 text-gray-900 dark:text-white">Pages</h3>
-            <ul className="space-y-2">
-              {pages
-                .filter(page => page.status === 'published')
-                .slice(0, 6)
-                .map(page => (
+                {pages.slice(0, 3).map(page => (
                   <li key={page.id}>
-                    <Link 
-                      to={`/page/${page.slug}`} 
-                      className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-                    >
+                    <Link to={`/page/${page.slug}`} className="hover:text-white transition-colors">
                       {page.title}
                     </Link>
                   </li>
                 ))}
-            </ul>
+              </ul>
+            </div>
           </div>
-
-          {/* Contact */}
-          <div className="col-span-1">
-            <h3 className="font-heading font-bold text-xl mb-4 text-gray-900 dark:text-white">Contact</h3>
-            {siteSettings.contactEmail && (
-              <p className="text-gray-600 dark:text-gray-300 mb-2">
-                <span className="font-semibold">Email:</span> {siteSettings.contactEmail}
-              </p>
-            )}
-            <Link 
-              to="/page/contact" 
-              className="inline-block mt-2 text-news-accent hover:underline transition-colors"
-            >
-              Contact Us
-            </Link>
-          </div>
-        </div>
-
-        <div className="border-t border-gray-200 dark:border-gray-800 mt-10 pt-6 text-center">
-          <p className="text-gray-500 dark:text-gray-400 text-sm">
-            &copy; {currentYear} {siteSettings.title}. All rights reserved.
-          </p>
         </div>
       </div>
     </footer>

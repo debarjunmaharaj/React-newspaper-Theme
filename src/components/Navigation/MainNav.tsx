@@ -32,14 +32,14 @@ export const MainNav = () => {
   };
 
   return (
-    <nav className="py-2">
-      <ul className="flex flex-wrap items-center">
+    <nav className="py-1">
+      <ul className="flex flex-wrap items-center text-sm font-medium">
         <li className="relative group" onMouseEnter={() => handleMouseEnter('home')} onMouseLeave={handleMouseLeave}>
           <Link 
             to="/" 
-            className="block py-2 px-4 font-medium hover:bg-red-700 transition-colors"
+            className="block py-2 px-3 font-medium hover:bg-red-700 transition-colors"
           >
-            Home
+            HOME
           </Link>
         </li>
         
@@ -54,11 +54,11 @@ export const MainNav = () => {
             >
               <Link 
                 to={`/category/${category.slug}`} 
-                className="flex items-center py-2 px-4 font-medium hover:bg-red-700 transition-colors"
+                className="flex items-center py-2 px-3 font-medium hover:bg-red-700 transition-colors uppercase"
               >
                 {category.name}
                 {hasChildren(category.id) && (
-                  <ChevronDown className="ml-1 h-4 w-4" />
+                  <ChevronDown className="ml-1 h-3 w-3" />
                 )}
               </Link>
               
@@ -69,7 +69,7 @@ export const MainNav = () => {
                       <li key={child.id}>
                         <Link 
                           to={`/category/${child.slug}`} 
-                          className="block px-4 py-2 hover:bg-gray-100 transition-colors"
+                          className="block px-4 py-2 hover:bg-gray-100 transition-colors text-sm"
                         >
                           {child.name}
                         </Link>
@@ -87,7 +87,7 @@ export const MainNav = () => {
             <li key={item.id}>
               <Link 
                 to={item.url} 
-                className="block py-2 px-4 font-medium hover:bg-red-700 transition-colors"
+                className="block py-2 px-3 font-medium hover:bg-red-700 transition-colors uppercase"
               >
                 {item.label}
               </Link>

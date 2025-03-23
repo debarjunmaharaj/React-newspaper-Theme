@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { generateSlug } from '@/lib/utils';
-import { Image, FileUp } from 'lucide-react';
+import { Image, FileUp, Upload, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import {
   Select,
@@ -52,8 +52,10 @@ export const ArticleEditor = () => {
   const [featuredImage, setFeaturedImage] = useState<string | undefined>(undefined);
   const [isGeneratingSlug, setIsGeneratingSlug] = useState(true);
   const [editorTab, setEditorTab] = useState<'visual' | 'code'>('visual');
+  const [isDragOver, setIsDragOver] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const featuredImageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isNew && id) {
@@ -90,41 +92,46 @@ export const ArticleEditor = () => {
     );
   };
 
-  const handleInlineImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      const file = event.target.files[0];
-      
-      // Check if it's an image file
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid File",
-          description: `${file.name} is not an image file.`,
-          variant: "destructive",
+  const handleImageUpload = (file: File, isFeatured: boolean = false) => {
+    // Check if it's an image file
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File",
+        description: `${file.name} is not an image file.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Check size (limit to 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: `${file.name} exceeds the 5MB size limit.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target && typeof e.target.result === 'string') {
+        // Add image to media library
+        addMedia({
+          name: file.name,
+          type: file.type,
+          url: e.target.result,
+          size: file.size,
         });
-        return;
-      }
-      
-      // Check size (limit to 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File Too Large",
-          description: `${file.name} exceeds the 5MB size limit.`,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target && typeof e.target.result === 'string') {
-          // Add image to media library
-          addMedia({
-            name: file.name,
-            type: file.type,
-            url: e.target.result,
-            size: file.size,
+        
+        if (isFeatured) {
+          // Set as featured image
+          setFeaturedImage(e.target.result);
+          toast({
+            title: "Featured Image Updated",
+            description: "The featured image has been updated",
           });
-          
+        } else {
           // Insert image into editor at cursor position
           const imageTag = `<img src="${e.target.result}" alt="${file.name}" class="w-full max-w-full h-auto my-4" />`;
           
@@ -141,8 +148,41 @@ export const ArticleEditor = () => {
             description: "Image has been added to the content",
           });
         }
-      };
-      reader.readAsDataURL(file);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleInlineImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
+      handleImageUpload(file);
+    }
+  };
+  
+  const handleFeaturedImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
+      handleImageUpload(file, true);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      handleImageUpload(file);
     }
   };
 
@@ -283,19 +323,39 @@ export const ArticleEditor = () => {
                   />
                 </div>
               </div>
-              <Textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder={editorTab === 'visual' ? "Start writing your article..." : "Enter HTML content..."}
-                className="h-64 font-mono"
-                required
-              />
+              <div 
+                className={`relative border rounded-md overflow-hidden ${
+                  isDragOver ? 'border-red-500 bg-red-50' : ''
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <Textarea
+                  id="content"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder={editorTab === 'visual' ? "Start writing your article..." : "Enter HTML content..."}
+                  className="h-64 font-mono border-none"
+                  required
+                />
+                {isDragOver && (
+                  <div className="absolute inset-0 bg-red-50 bg-opacity-80 flex items-center justify-center">
+                    <div className="text-center p-4">
+                      <Upload className="h-12 w-12 mx-auto text-red-500 mb-2" />
+                      <p className="text-xl font-semibold">Drop to Upload Image</p>
+                    </div>
+                  </div>
+                )}
+              </div>
               {editorTab === 'code' && (
                 <p className="text-xs text-muted-foreground">
                   You can use HTML tags like &lt;h1&gt;, &lt;p&gt;, &lt;img&gt;, etc.
                 </p>
               )}
+              <div className="text-sm text-gray-500 italic mt-2">
+                Tip: You can drag and drop images directly into the editor!
+              </div>
             </div>
             
             <div className="space-y-2">
@@ -360,44 +420,62 @@ export const ArticleEditor = () => {
                   
                   <div className="space-y-2">
                     <Label>Featured Image</Label>
-                    <div className="flex items-center gap-2">
-                      <Select 
-                        value={featuredImage} 
-                        onValueChange={setFeaturedImage}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select image" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={undefined}>None</SelectItem>
-                          {media
-                            .filter(item => item.type.startsWith('image/'))
-                            .map((item) => (
-                              <SelectItem key={item.id} value={item.url}>
-                                {item.name}
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <FileUp className="h-4 w-4" />
-                      </Button>
-                    </div>
                     
-                    {featuredImage && (
-                      <div className="mt-2 rounded-md overflow-hidden border">
-                        <img 
-                          src={featuredImage} 
-                          alt="Featured" 
-                          className="w-full h-32 object-cover"
-                        />
-                      </div>
-                    )}
+                    {/* Featured Image Upload/Preview */}
+                    <div className="mt-2 border rounded-md p-4 text-center">
+                      {featuredImage ? (
+                        <div className="relative">
+                          <img 
+                            src={featuredImage} 
+                            alt="Featured" 
+                            className="w-full h-40 object-cover rounded-md"
+                          />
+                          <button
+                            type="button"
+                            className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full"
+                            onClick={() => setFeaturedImage(undefined)}
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div 
+                          className="border-2 border-dashed rounded-md p-6 cursor-pointer hover:bg-gray-50 transition-colors"
+                          onClick={() => featuredImageInputRef.current?.click()}
+                        >
+                          <Image className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-500">
+                            Click to upload featured image
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            JPG, PNG, GIF up to 5MB
+                          </p>
+                        </div>
+                      )}
+                      
+                      <input
+                        type="file"
+                        ref={featuredImageInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleFeaturedImageUpload}
+                      />
+                      
+                      {featuredImage && (
+                        <div className="flex mt-2">
+                          <Button 
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => featuredImageInputRef.current?.click()}
+                          >
+                            <FileUp className="h-4 w-4 mr-1" />
+                            Change Image
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>

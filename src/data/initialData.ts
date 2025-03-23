@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   username: string;
@@ -14,6 +13,7 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
+  parentId?: string;
 }
 
 export interface Article {
@@ -23,8 +23,8 @@ export interface Article {
   content: string;
   excerpt: string;
   featuredImage?: string;
-  author: string; // userId
-  categories: string[]; // categoryIds
+  author: string;
+  categories: string[];
   status: 'draft' | 'published';
   createdAt: string;
   updatedAt: string;
@@ -46,7 +46,7 @@ export interface MenuItem {
   label: string;
   url: string;
   order: number;
-  parent?: string; // parentId
+  location: 'main' | 'footer' | 'social';
 }
 
 export interface Media {
@@ -54,8 +54,8 @@ export interface Media {
   name: string;
   type: string;
   url: string;
-  uploadedAt: string;
   size: number;
+  uploadedAt: string;
 }
 
 export interface SiteSettings {
@@ -63,21 +63,14 @@ export interface SiteSettings {
   tagline: string;
   description: string;
   logo?: string;
-  favicon?: string;
-  social: {
-    facebook?: string;
-    twitter?: string;
-    instagram?: string;
-    linkedin?: string;
-  };
-  contactEmail?: string;
+  footerText: string;
 }
 
 export const initialUsers: User[] = [
   {
     id: '1',
     username: 'admin',
-    password: 'admin', // In a real app, this would be hashed
+    password: 'admin',
     name: 'Admin User',
     email: 'admin@example.com',
     role: 'admin',
@@ -283,13 +276,9 @@ export const initialMenuItems: MenuItem[] = [
 ];
 
 export const initialSiteSettings: SiteSettings = {
-  title: 'The Daily Chronicle',
-  tagline: 'Informed Perspectives, Every Day',
-  description: 'Your trusted source for the latest news, in-depth analysis, and thoughtful commentary on the issues that matter most.',
-  social: {
-    facebook: 'https://facebook.com/dailychronicle',
-    twitter: 'https://twitter.com/dailychronicle',
-    instagram: 'https://instagram.com/dailychronicle',
-  },
-  contactEmail: 'contact@dailychronicle.example.com',
+  title: 'Daily Express',
+  tagline: 'Your trusted source for daily news and updates',
+  description: 'A modern news platform for the latest updates on politics, business, technology, sports, and more.',
+  logo: undefined,
+  footerText: '© 2023 Daily Express. All rights reserved.'
 };

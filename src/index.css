@@ -35,7 +35,8 @@
  
     --radius: 0.5rem;
     
-    --news-accent: 0 73% 42%;
+    --news-accent: 0 100% 50%;
+    --news-secondary: 0 0% 20%;
   }
  
   .dark {
@@ -80,7 +81,7 @@
 
 @layer components {
   .news-container {
-    @apply container max-w-screen-xl mx-auto px-4;
+    @apply container max-w-screen-xl mx-auto px-2 md:px-4;
   }
   
   .page-transition {
@@ -127,6 +128,63 @@
   .article-content blockquote {
     @apply border-l-4 border-red-600 pl-4 italic my-4 text-gray-700;
   }
+  
+  /* Newspaper specific components */
+  .news-headline {
+    @apply text-xl md:text-2xl font-bold hover:text-red-600 transition-colors;
+  }
+  
+  .news-subheadline {
+    @apply text-lg font-bold hover:text-red-600 transition-colors;
+  }
+  
+  .news-category-label {
+    @apply bg-red-600 text-white text-xs font-semibold px-2 py-1 uppercase inline-block;
+  }
+  
+  .news-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+  
+  .news-card {
+    @apply border-b pb-4 hover:bg-gray-50 transition-colors;
+  }
+  
+  .news-section-title {
+    @apply border-b-2 border-red-600 mb-4 flex items-center;
+  }
+  
+  .news-section-title h2 {
+    @apply inline-block bg-red-600 text-white px-3 py-1 font-bold text-sm uppercase;
+  }
+  
+  .news-date {
+    @apply text-xs text-gray-500;
+  }
+  
+  .news-excerpt {
+    @apply text-sm text-gray-600;
+  }
+  
+  .news-thumbnail {
+    @apply w-full object-cover mb-2;
+  }
+  
+  .news-thumbnail-sm {
+    @apply h-20 w-24 object-cover;
+  }
+  
+  .news-thumbnail-md {
+    @apply h-32 w-full object-cover;
+  }
+  
+  .news-thumbnail-lg {
+    @apply h-48 w-full object-cover;
+  }
+  
+  .news-horizontal-card {
+    @apply flex gap-3 border-b pb-3;
+  }
 }
 
 /* Animation for news ticker */
@@ -137,4 +195,21 @@
   100% {
     transform: translateX(-100%);
   }
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-blink {
+  animation: blink 2s infinite;
+}
+
+.news-ticker {
+  @apply whitespace-nowrap animate-[marquee_20s_linear_infinite];
 }

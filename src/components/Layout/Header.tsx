@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MainNav } from '@/components/Navigation/MainNav';
-import { MenuIcon, Search, X, ChevronDown } from 'lucide-react';
+import { MenuIcon, Search, X, Phone, Mail, User, Calendar } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 
 export const Header = () => {
@@ -34,29 +34,46 @@ export const Header = () => {
 
   return (
     <header className="border-b">
-      {/* Top Header */}
+      {/* Top Bar */}
       <div className="bg-gray-100 border-b">
         <div className="news-container py-1">
           <div className="flex justify-between items-center text-xs">
-            <div>{formatDate(currentDate)}</div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center">
+                <Calendar className="h-3 w-3 mr-1" />
+                {formatDate(currentDate)}
+              </div>
+              <div className="hidden md:flex items-center">
+                <Phone className="h-3 w-3 mr-1" />
+                <span>+1-234-567-8900</span>
+              </div>
+              <div className="hidden md:flex items-center">
+                <Mail className="h-3 w-3 mr-1" />
+                <span>info@dailyexpress.com</span>
+              </div>
+            </div>
             <div className="flex space-x-4">
               {user ? (
-                <Link to="/admin" className="hover:underline">Admin Dashboard</Link>
+                <Link to="/admin" className="hover:underline flex items-center">
+                  <User className="h-3 w-3 mr-1" />
+                  Admin
+                </Link>
               ) : (
-                <Link to="/admin/login" className="hover:underline">Login</Link>
+                <Link to="/admin/login" className="hover:underline flex items-center">
+                  <User className="h-3 w-3 mr-1" />
+                  Login
+                </Link>
               )}
-              <span>|</span>
-              <a href="#" className="hover:underline">Subscribe</a>
-              <span>|</span>
-              <a href="#" className="hover:underline">Contact</a>
+              <span className="hidden md:inline">|</span>
+              <a href="#" className="hover:underline hidden md:inline">Subscribe</a>
             </div>
           </div>
         </div>
       </div>
       
       {/* Main Header */}
-      <div className="news-container py-4">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="news-container py-3">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-2">
           <div className="flex items-center">
             <Button 
               variant="ghost" 
@@ -82,10 +99,11 @@ export const Header = () => {
             </Link>
           </div>
           
-          <div className="text-center md:text-right">
-            <p className="text-sm italic text-muted-foreground">
-              {siteSettings.tagline}
-            </p>
+          {/* Ad Banner */}
+          <div className="w-full md:w-auto py-2">
+            <div className="bg-gray-200 h-14 w-full md:w-[468px] flex items-center justify-center text-gray-500 text-sm">
+              Advertisement 468x60
+            </div>
           </div>
           
           {/* Search Button */}
@@ -138,13 +156,13 @@ export const Header = () => {
           
           {/* Mobile Navigation */}
           {isMenuOpen && (
-            <div className="md:hidden py-4">
+            <div className="md:hidden py-2">
               <nav>
-                <ul className="space-y-2">
+                <ul className="space-y-1">
                   <li>
                     <Link 
                       to="/" 
-                      className="block py-2 px-4 hover:bg-red-700 rounded"
+                      className="block py-2 px-3 hover:bg-red-700 rounded"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Home
@@ -155,7 +173,7 @@ export const Header = () => {
                     <li key={category.id}>
                       <Link 
                         to={`/category/${category.slug}`} 
-                        className="block py-2 px-4 hover:bg-red-700 rounded"
+                        className="block py-2 px-3 hover:bg-red-700 rounded"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         {category.name}
@@ -170,14 +188,14 @@ export const Header = () => {
       </div>
       
       {/* Breaking News Ticker */}
-      <div className="bg-black text-white py-2">
+      <div className="bg-black text-white py-1">
         <div className="news-container">
           <div className="flex items-center overflow-hidden">
-            <div className="bg-red-600 py-1 px-3 text-sm font-semibold mr-3 whitespace-nowrap">
+            <div className="bg-red-600 py-1 px-2 text-xs font-semibold mr-2 whitespace-nowrap animate-blink uppercase">
               BREAKING
             </div>
-            <div className="whitespace-nowrap animate-[marquee_20s_linear_infinite]">
-              Latest Breaking News: Check out our latest articles and updates. Stay informed with our comprehensive coverage.
+            <div className="news-ticker">
+              Latest Breaking News: World leaders gather for climate summit • Stock markets reach new high • Sports champions announced • Tech company launches revolutionary product • Health officials announce breakthrough
             </div>
           </div>
         </div>

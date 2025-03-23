@@ -27,11 +27,11 @@ const Index = () => {
     setFeaturedArticles(
       sortedArticles
         .filter(article => article.featuredImage)
-        .slice(0, 5)
+        .slice(0, 15)
     );
     
     // Set latest articles
-    setLatestArticles(sortedArticles.slice(0, 10));
+    setLatestArticles(sortedArticles.slice(0, 20));
     
     // Group articles by category
     const articlesByCategory: Record<string, any[]> = {};
@@ -40,160 +40,219 @@ const Index = () => {
         article => article.categories.includes(category.id)
       );
       if (categoryArticles.length > 0) {
-        articlesByCategory[category.id] = categoryArticles.slice(0, 6);
+        articlesByCategory[category.id] = categoryArticles.slice(0, 8);
       }
     });
     setCategorizedArticles(articlesByCategory);
     
   }, [articles, categories]);
+
+  // Helper function for article cards
+  const renderArticleCard = (article: any, size: 'sm' | 'md' | 'lg' = 'md') => {
+    const imageClass = size === 'sm' ? 'h-20' : size === 'lg' ? 'h-48' : 'h-32';
+    
+    return (
+      <div key={article.id} className="news-card">
+        {article.featuredImage && (
+          <Link to={`/article/${article.slug}`} className="block">
+            <img 
+              src={article.featuredImage} 
+              alt={article.title}
+              className={`news-thumbnail ${imageClass} w-full object-cover`}
+            />
+          </Link>
+        )}
+        <div className="space-y-1">
+          <div className="flex text-xs space-x-2 mb-1">
+            <span className="news-category-label">BREAKING</span>
+            <span className="news-date">{formatDate(article.publishedAt || article.updatedAt)}</span>
+          </div>
+          <Link to={`/article/${article.slug}`}>
+            <h3 className={size === 'lg' ? 'news-headline' : 'news-subheadline'}>
+              {article.title}
+            </h3>
+          </Link>
+          {size !== 'sm' && (
+            <p className="news-excerpt">
+              {truncateText(article.excerpt, size === 'lg' ? 150 : 100)}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  };
+  
+  const renderHorizontalCard = (article: any) => {
+    return (
+      <div key={article.id} className="news-horizontal-card">
+        {article.featuredImage && (
+          <Link to={`/article/${article.slug}`} className="shrink-0">
+            <img 
+              src={article.featuredImage} 
+              alt={article.title}
+              className="news-thumbnail-sm"
+            />
+          </Link>
+        )}
+        <div className="space-y-1">
+          <Link to={`/article/${article.slug}`}>
+            <h3 className="font-semibold hover:text-red-600 text-sm">
+              {truncateText(article.title, 70)}
+            </h3>
+          </Link>
+          <span className="news-date block">{formatDate(article.publishedAt || article.updatedAt)}</span>
+        </div>
+      </div>
+    );
+  };
   
   return (
     <PublicLayout>
-      <div className="space-y-8">
+      <div className="space-y-4">
         {/* Top Ad Banner */}
         <div className="w-full bg-gray-200 h-16 flex items-center justify-center text-gray-500 border">
-          Advertisement Banner
+          Advertisement Banner 728x90
         </div>
       
-        {/* Featured Articles Slider */}
-        {featuredArticles.length > 0 && (
-          <div className="rounded overflow-hidden">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {featuredArticles.slice(0, 1).map(article => (
-                <div key={article.id} className="md:col-span-2 lg:col-span-2 relative group h-80">
-                  <Link to={`/article/${article.slug}`}>
-                    <div className="absolute inset-0 bg-black">
-                      <img 
-                        src={article.featuredImage} 
-                        alt={article.title}
-                        className="w-full h-full object-cover opacity-80 group-hover:opacity-90 transition-opacity"
-                      />
-                    </div>
-                    <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
-                      <div className="bg-red-600 text-white text-xs font-medium px-2 py-1 mb-3 w-fit">
-                        BREAKING
-                      </div>
-                      <h2 className="text-2xl font-bold mb-2 group-hover:underline">{article.title}</h2>
-                      <p className="text-sm opacity-80">{formatDate(article.publishedAt || article.updatedAt)}</p>
-                    </div>
-                  </Link>
-                </div>
-              ))}
-              
-              <div className="lg:col-span-1 space-y-4">
-                {featuredArticles.slice(1, 3).map(article => (
-                  <div key={article.id} className="relative group h-[9.5rem]">
-                    <Link to={`/article/${article.slug}`}>
-                      <div className="absolute inset-0 bg-black">
-                        <img 
-                          src={article.featuredImage} 
-                          alt={article.title}
-                          className="w-full h-full object-cover opacity-80 group-hover:opacity-90 transition-opacity"
-                        />
-                      </div>
-                      <div className="absolute inset-0 flex flex-col justify-end p-4 text-white">
-                        <h3 className="text-base font-bold group-hover:underline">{article.title}</h3>
-                        <p className="text-xs opacity-80">{formatDate(article.publishedAt || article.updatedAt)}</p>
-                      </div>
-                    </Link>
-                  </div>
-                ))}
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* Left Sidebar */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="border p-2">
+              <div className="news-section-title">
+                <h2>LATEST</h2>
               </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Latest News Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="md:col-span-2 space-y-6">
-            {/* Latest News */}
-            <div>
-              <div className="border-b-2 border-red-600 mb-4">
-                <h2 className="inline-block bg-red-600 text-white px-4 py-2 font-bold">LATEST NEWS</h2>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {latestArticles.slice(0, 6).map(article => (
-                  <div key={article.id} className="border-b pb-4">
-                    {article.featuredImage && (
-                      <Link to={`/article/${article.slug}`} className="block mb-2">
-                        <img 
-                          src={article.featuredImage} 
-                          alt={article.title}
-                          className="w-full h-44 object-cover"
-                        />
+              <div className="space-y-3 mt-3">
+                {latestArticles.slice(0, 5).map((article, idx) => (
+                  <div key={article.id} className="flex gap-2 border-b pb-3 last:border-0">
+                    <div className="text-xl font-bold text-red-600 w-6">{idx + 1}</div>
+                    <div>
+                      <Link to={`/article/${article.slug}`}>
+                        <h4 className="font-medium text-sm hover:text-red-600 transition-colors">
+                          {truncateText(article.title, 60)}
+                        </h4>
                       </Link>
-                    )}
-                    <Link to={`/article/${article.slug}`}>
-                      <h3 className="font-bold text-lg mb-1 hover:text-red-600 transition-colors">{article.title}</h3>
-                    </Link>
-                    <p className="text-sm text-gray-600 mb-2">{truncateText(article.excerpt, 120)}</p>
-                    <div className="text-xs text-gray-500">{formatDate(article.publishedAt || article.updatedAt)}</div>
+                      <p className="text-xs text-gray-500 mt-1">{formatDate(article.publishedAt || article.updatedAt)}</p>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
             
-            {/* Category News Sections */}
-            {Object.entries(categorizedArticles).map(([catId, catArticles], index) => {
+            {/* Ad Space */}
+            <div className="bg-gray-200 h-[250px] flex items-center justify-center text-gray-500 border text-sm">
+              Ad 160x250
+            </div>
+          </div>
+          
+          {/* Main Content */}
+          <div className="lg:col-span-7 space-y-4">
+            {/* Featured Articles Grid */}
+            {featuredArticles.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Main Featured Article */}
+                <div className="md:col-span-2">
+                  {renderArticleCard(featuredArticles[0], 'lg')}
+                </div>
+                
+                {/* Secondary Featured Articles */}
+                {featuredArticles.slice(1, 5).map(article => (
+                  <div key={article.id}>
+                    {renderArticleCard(article, 'md')}
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Category Sections */}
+            {Object.entries(categorizedArticles).slice(0, 3).map(([catId, catArticles], index) => {
               const category = categories.find(c => c.id === catId);
               if (!category || catArticles.length === 0) return null;
               
               return (
-                <div key={catId} className={index % 2 === 0 ? "bg-gray-50 p-4" : "p-4"}>
-                  <div className="border-b-2 border-red-600 mb-4">
-                    <Link to={`/category/${category.slug}`} className="inline-block">
-                      <h2 className="inline-block bg-red-600 text-white px-4 py-2 font-bold">
-                        {category.name.toUpperCase()}
-                      </h2>
+                <div key={catId} className="border-t pt-4">
+                  <div className="news-section-title">
+                    <Link to={`/category/${category.slug}`}>
+                      <h2>{category.name.toUpperCase()}</h2>
                     </Link>
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {catArticles.slice(0, 4).map(article => (
-                      <div key={article.id} className="border-b pb-4">
-                        {article.featuredImage && (
-                          <Link to={`/article/${article.slug}`} className="block mb-2">
-                            <img 
-                              src={article.featuredImage} 
-                              alt={article.title}
-                              className="w-full h-44 object-cover"
-                            />
-                          </Link>
-                        )}
-                        <Link to={`/article/${article.slug}`}>
-                          <h3 className="font-bold text-lg mb-1 hover:text-red-600 transition-colors">{article.title}</h3>
-                        </Link>
-                        <p className="text-sm text-gray-600 mb-2">{truncateText(article.excerpt, 100)}</p>
-                        <div className="text-xs text-gray-500">{formatDate(article.publishedAt || article.updatedAt)}</div>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                    {/* Main Category Article */}
+                    <div className="md:col-span-1">
+                      {renderArticleCard(catArticles[0], 'md')}
+                    </div>
+                    
+                    {/* Category List */}
+                    <div className="md:col-span-1 space-y-3">
+                      {catArticles.slice(1, 4).map(article => (
+                        renderHorizontalCard(article)
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            
+            {/* Mid Page Ad Banner */}
+            <div className="w-full bg-gray-200 h-[90px] flex items-center justify-center text-gray-500 border">
+              Advertisement Banner 728x90
+            </div>
+            
+            {/* More Category Sections */}
+            {Object.entries(categorizedArticles).slice(3, 6).map(([catId, catArticles], index) => {
+              const category = categories.find(c => c.id === catId);
+              if (!category || catArticles.length === 0) return null;
+              
+              return (
+                <div key={catId} className="border-t pt-4">
+                  <div className="news-section-title">
+                    <Link to={`/category/${category.slug}`}>
+                      <h2>{category.name.toUpperCase()}</h2>
+                    </Link>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                    {/* Main Category Article */}
+                    <div className="md:col-span-1">
+                      {renderArticleCard(catArticles[0], 'md')}
+                    </div>
+                    
+                    {/* Category List */}
+                    <div className="md:col-span-1 space-y-3">
+                      {catArticles.slice(1, 4).map(article => (
+                        renderHorizontalCard(article)
+                      ))}
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
           
-          {/* Sidebar */}
-          <div className="space-y-6">
+          {/* Right Sidebar */}
+          <div className="lg:col-span-3 space-y-4">
             {/* Ad Space */}
-            <div className="bg-gray-200 h-60 flex items-center justify-center text-gray-500 border">
-              Sidebar Advertisement
+            <div className="bg-gray-200 h-[250px] flex items-center justify-center text-gray-500 border text-sm">
+              Ad 300x250
             </div>
             
             {/* Most Read Articles */}
-            <div className="border p-4">
-              <h3 className="text-lg font-bold mb-4 border-b pb-2">MOST READ</h3>
-              <div className="space-y-4">
+            <div className="border p-2">
+              <div className="news-section-title">
+                <h2>MOST READ</h2>
+              </div>
+              <div className="space-y-3 mt-3">
                 {latestArticles.slice(0, 5).map((article, idx) => (
-                  <div key={article.id} className="flex gap-2">
-                    <div className="text-xl font-bold text-red-600 w-8">{idx + 1}</div>
+                  <div key={article.id} className="flex gap-2 border-b pb-3 last:border-0">
+                    <div className="text-xl font-bold text-red-600 w-6">{idx + 1}</div>
                     <div>
                       <Link to={`/article/${article.slug}`}>
-                        <h4 className="font-medium hover:text-red-600 transition-colors">{article.title}</h4>
+                        <h4 className="font-medium text-sm hover:text-red-600 transition-colors">
+                          {truncateText(article.title, 60)}
+                        </h4>
                       </Link>
-                      <p className="text-xs text-gray-500">{formatDate(article.publishedAt || article.updatedAt)}</p>
+                      <p className="text-xs text-gray-500 mt-1">{formatDate(article.publishedAt || article.updatedAt)}</p>
                     </div>
                   </div>
                 ))}
@@ -201,14 +260,14 @@ const Index = () => {
             </div>
             
             {/* Category Tabs */}
-            <div className="border">
+            <div className="border p-2">
               <Tabs defaultValue={categories[0]?.id}>
                 <TabsList className="w-full justify-start overflow-auto flex-nowrap">
                   {categories.slice(0, 4).map(category => (
                     <TabsTrigger 
                       key={category.id} 
                       value={category.id}
-                      className="text-xs whitespace-nowrap"
+                      className="text-xs uppercase"
                     >
                       {category.name}
                     </TabsTrigger>
@@ -218,8 +277,8 @@ const Index = () => {
                 {categories.slice(0, 4).map(category => {
                   const catArticles = categorizedArticles[category.id] || [];
                   return (
-                    <TabsContent key={category.id} value={category.id} className="p-4">
-                      <div className="space-y-4">
+                    <TabsContent key={category.id} value={category.id} className="p-2">
+                      <div className="space-y-3">
                         {catArticles.slice(0, 3).map(article => (
                           <div key={article.id} className="pb-3 border-b last:border-0">
                             {article.featuredImage && (
@@ -240,7 +299,7 @@ const Index = () => {
                         
                         <Link 
                           to={`/category/${category.slug}`}
-                          className="text-red-600 text-sm font-medium hover:underline block text-right"
+                          className="text-red-600 text-xs font-medium hover:underline block text-right"
                         >
                           View All {category.name} News →
                         </Link>
@@ -252,8 +311,8 @@ const Index = () => {
             </div>
             
             {/* More Ad Space */}
-            <div className="bg-gray-200 h-60 flex items-center justify-center text-gray-500 border">
-              Sidebar Advertisement
+            <div className="bg-gray-200 h-[250px] flex items-center justify-center text-gray-500 border text-sm">
+              Ad 300x250
             </div>
           </div>
         </div>
