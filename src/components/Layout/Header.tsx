@@ -1,69 +1,185 @@
 
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useSite } from '@/context/SiteContext';
-import { MainNav } from '@/components/Navigation/MainNav';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { MainNav } from '@/components/Navigation/MainNav';
+import { MenuIcon, Search, X, ChevronDown } from 'lucide-react';
+import { formatDate } from '@/lib/utils';
 
 export const Header = () => {
-  const { siteSettings } = useSite();
-  const { isAuthenticated, logout } = useAuth();
+  const { siteSettings, categories } = useSite();
+  const { user } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentDate(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+    if (isSearchOpen) setIsSearchOpen(false);
+  };
+
+  const toggleSearch = () => {
+    setIsSearchOpen(!isSearchOpen);
+    if (isMenuOpen) setIsMenuOpen(false);
+  };
 
   return (
-    <header className="border-b border-b-gray-200 dark:border-b-gray-800 bg-white dark:bg-gray-900 shadow-sm backdrop-blur-md bg-opacity-90 dark:bg-opacity-90 sticky top-0 z-50 transition-all duration-300">
-      <div className="news-container py-4 px-6">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <Link to="/" className="transition-transform duration-300 hover:scale-105">
+    <header className="border-b">
+      {/* Top Header */}
+      <div className="bg-gray-100 border-b">
+        <div className="news-container py-1">
+          <div className="flex justify-between items-center text-xs">
+            <div>{formatDate(currentDate)}</div>
+            <div className="flex space-x-4">
+              {user ? (
+                <Link to="/admin" className="hover:underline">Admin Dashboard</Link>
+              ) : (
+                <Link to="/admin/login" className="hover:underline">Login</Link>
+              )}
+              <span>|</span>
+              <a href="#" className="hover:underline">Subscribe</a>
+              <span>|</span>
+              <a href="#" className="hover:underline">Contact</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Main Header */}
+      <div className="news-container py-4">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleMenu}
+              className="md:hidden mr-2"
+            >
+              <MenuIcon className="h-6 w-6" />
+            </Button>
+            
+            <Link to="/" className="flex items-center">
               {siteSettings.logo ? (
                 <img 
                   src={siteSettings.logo} 
                   alt={siteSettings.title} 
-                  className="h-10 w-auto"
+                  className="h-14 mr-3" 
                 />
               ) : (
-                <h1 className="text-2xl font-heading font-bold tracking-tight text-gray-900 dark:text-white">
+                <h1 className="text-3xl font-bold tracking-tighter text-red-600">
                   {siteSettings.title}
                 </h1>
               )}
             </Link>
-            <p className="text-sm text-gray-500 dark:text-gray-400 hidden md:block">
+          </div>
+          
+          <div className="text-center md:text-right">
+            <p className="text-sm italic text-muted-foreground">
               {siteSettings.tagline}
             </p>
           </div>
           
-          <div className="hidden md:flex items-center space-x-6">
-            <MainNav className="mx-6" />
-            
-            <div className="flex items-center space-x-2">
-              {isAuthenticated ? (
-                <>
-                  <Button asChild variant="ghost" size="sm">
-                    <Link to="/admin">Dashboard</Link>
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={logout}>
-                    Logout
-                  </Button>
-                </>
+          {/* Search Button */}
+          <div className="flex items-center">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleSearch}
+              className="ml-2"
+            >
+              {isSearchOpen ? (
+                <X className="h-5 w-5" />
               ) : (
-                <Button asChild variant="outline" size="sm">
-                  <Link to="/admin/login">Admin Login</Link>
-                </Button>
+                <Search className="h-5 w-5" />
               )}
-            </div>
+            </Button>
           </div>
-          
-          {/* Mobile menu button */}
-          <button className="md:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
         </div>
         
-        {/* Mobile nav - shown on small screens */}
-        <div className="md:hidden mt-4 pb-2 hidden">
-          <MainNav className="flex flex-col space-y-3" />
+        {/* Search Bar */}
+        {isSearchOpen && (
+          <div className="py-3 border-t">
+            <form 
+              className="flex gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                // Handle search
+                console.log('Searching for:', searchTerm);
+              }}
+            >
+              <Input
+                placeholder="Search articles..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1"
+                autoFocus
+              />
+              <Button type="submit">Search</Button>
+            </form>
+          </div>
+        )}
+      </div>
+      
+      {/* Navigation */}
+      <div className="bg-red-600 text-white shadow">
+        <div className="news-container">
+          <div className="hidden md:block">
+            <MainNav />
+          </div>
+          
+          {/* Mobile Navigation */}
+          {isMenuOpen && (
+            <div className="md:hidden py-4">
+              <nav>
+                <ul className="space-y-2">
+                  <li>
+                    <Link 
+                      to="/" 
+                      className="block py-2 px-4 hover:bg-red-700 rounded"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Home
+                    </Link>
+                  </li>
+                  
+                  {categories.map(category => (
+                    <li key={category.id}>
+                      <Link 
+                        to={`/category/${category.slug}`} 
+                        className="block py-2 px-4 hover:bg-red-700 rounded"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {category.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {/* Breaking News Ticker */}
+      <div className="bg-black text-white py-2">
+        <div className="news-container">
+          <div className="flex items-center overflow-hidden">
+            <div className="bg-red-600 py-1 px-3 text-sm font-semibold mr-3 whitespace-nowrap">
+              BREAKING
+            </div>
+            <div className="whitespace-nowrap animate-[marquee_20s_linear_infinite]">
+              Latest Breaking News: Check out our latest articles and updates. Stay informed with our comprehensive coverage.
+            </div>
+          </div>
         </div>
       </div>
     </header>

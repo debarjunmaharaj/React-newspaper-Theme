@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSite } from '@/context/SiteContext';
 import { useAuth } from '@/context/AuthContext';
@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { generateSlug } from '@/lib/utils';
+import { Image, FileUp } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 import {
   Select,
   SelectContent,
@@ -17,18 +19,26 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@/components/ui/tabs';
 
 export const ArticleEditor = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const { 
     articles, 
     categories, 
     addArticle, 
     updateArticle, 
     deleteArticle,
-    media
+    media,
+    addMedia
   } = useSite();
   
   const isNew = id === 'new';
@@ -41,6 +51,9 @@ export const ArticleEditor = () => {
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [featuredImage, setFeaturedImage] = useState<string | undefined>(undefined);
   const [isGeneratingSlug, setIsGeneratingSlug] = useState(true);
+  const [editorTab, setEditorTab] = useState<'visual' | 'code'>('visual');
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isNew && id) {
@@ -77,10 +90,71 @@ export const ArticleEditor = () => {
     );
   };
 
+  const handleInlineImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0];
+      
+      // Check if it's an image file
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid File",
+          description: `${file.name} is not an image file.`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Check size (limit to 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: `${file.name} exceeds the 5MB size limit.`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target && typeof e.target.result === 'string') {
+          // Add image to media library
+          addMedia({
+            name: file.name,
+            type: file.type,
+            url: e.target.result,
+            size: file.size,
+          });
+          
+          // Insert image into editor at cursor position
+          const imageTag = `<img src="${e.target.result}" alt="${file.name}" class="w-full max-w-full h-auto my-4" />`;
+          
+          // If in visual mode, append to content
+          if (editorTab === 'visual') {
+            setContent(prev => prev + '\n\n' + imageTag);
+          } else {
+            // In code mode, add at cursor or append
+            setContent(prev => prev + '\n\n' + imageTag);
+          }
+          
+          toast({
+            title: "Image Uploaded",
+            description: "Image has been added to the content",
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title || !slug || !content) {
+      toast({
+        title: "Required Fields Missing",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
       return;
     }
     
@@ -182,15 +256,46 @@ export const ArticleEditor = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="content">Content</Label>
+              <div className="flex justify-between items-center mb-2">
+                <Label htmlFor="content">Content</Label>
+                <div className="flex space-x-2">
+                  <Tabs value={editorTab} onValueChange={(value) => setEditorTab(value as 'visual' | 'code')}>
+                    <TabsList>
+                      <TabsTrigger value="visual">Visual</TabsTrigger>
+                      <TabsTrigger value="code">HTML</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <FileUp className="h-4 w-4 mr-1" />
+                    Add Image
+                  </Button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleInlineImageUpload}
+                  />
+                </div>
+              </div>
               <Textarea
                 id="content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Article content..."
+                placeholder={editorTab === 'visual' ? "Start writing your article..." : "Enter HTML content..."}
                 className="h-64 font-mono"
                 required
               />
+              {editorTab === 'code' && (
+                <p className="text-xs text-muted-foreground">
+                  You can use HTML tags like &lt;h1&gt;, &lt;p&gt;, &lt;img&gt;, etc.
+                </p>
+              )}
             </div>
             
             <div className="space-y-2">
@@ -202,7 +307,7 @@ export const ArticleEditor = () => {
                 placeholder="Short description (optional)"
                 className="h-24"
               />
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 If left empty, excerpt will be generated from content
               </p>
             </div>
@@ -248,31 +353,41 @@ export const ArticleEditor = () => {
                           </div>
                         ))
                       ) : (
-                        <p className="text-sm text-gray-500">No categories available</p>
+                        <p className="text-sm text-muted-foreground">No categories available</p>
                       )}
                     </div>
                   </div>
                   
                   <div className="space-y-2">
                     <Label>Featured Image</Label>
-                    <Select 
-                      value={featuredImage} 
-                      onValueChange={setFeaturedImage}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select image" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={undefined}>None</SelectItem>
-                        {media
-                          .filter(item => item.type.startsWith('image/'))
-                          .map((item) => (
-                            <SelectItem key={item.id} value={item.url}>
-                              {item.name}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center gap-2">
+                      <Select 
+                        value={featuredImage} 
+                        onValueChange={setFeaturedImage}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select image" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={undefined}>None</SelectItem>
+                          {media
+                            .filter(item => item.type.startsWith('image/'))
+                            .map((item) => (
+                              <SelectItem key={item.id} value={item.url}>
+                                {item.name}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <FileUp className="h-4 w-4" />
+                      </Button>
+                    </div>
                     
                     {featuredImage && (
                       <div className="mt-2 rounded-md overflow-hidden border">
