@@ -1,3 +1,6 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,19 +38,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -79,6 +75,7 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+    
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -96,6 +93,104 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold tracking-tight;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl mb-6;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl mb-4;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl mb-3;
+  }
+
+  p {
+    @apply leading-relaxed mb-4;
+  }
+
+  .article-content {
+    @apply font-serif text-lg leading-relaxed;
+  }
+}
+
+@layer components {
+  .news-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .article-card {
+    @apply bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300;
+  }
+  
+  .btn-primary {
+    @apply px-4 py-2 bg-news-accent text-white rounded-md hover:bg-blue-700 transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200;
+  }
+  
+  .news-heading {
+    @apply font-heading font-bold text-news-800 dark:text-news-200;
+  }
+
+  .news-subheading {
+    @apply font-sans text-news-600 dark:text-news-400;
+  }
+  
+  .news-separator {
+    @apply h-px w-full bg-news-300 my-6;
+  }
+
+  .page-transition {
+    @apply animate-fade-in;
+  }
+}
+
+/* Admin Dashboard Styles */
+.admin-sidebar {
+  @apply w-64 bg-white dark:bg-gray-900 shadow-sm;
+}
+
+.admin-content {
+  @apply flex-1 overflow-auto;
+}
+
+.admin-card {
+  @apply rounded-lg border border-news-300 dark:border-news-700 shadow-sm hover:shadow-md transition-all duration-300 bg-white dark:bg-gray-800;
+}
+
+/* Custom Animations */
+.hover-lift {
+  @apply transition-transform duration-300;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-news-200 dark:bg-news-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-news-400 dark:bg-news-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-news-500 dark:bg-news-500;
 }

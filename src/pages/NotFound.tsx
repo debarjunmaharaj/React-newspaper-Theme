@@ -1,5 +1,7 @@
-import { useLocation } from "react-router-dom";
+
+import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
+import { PublicLayout } from "@/components/Layout/PublicLayout";
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,15 +14,21 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
+    <PublicLayout>
+      <div className="text-center py-12">
+        <h1 className="font-heading font-bold text-6xl md:text-7xl text-gray-900 dark:text-white mb-6">404</h1>
+        <h2 className="text-2xl font-semibold mb-4">Page Not Found</h2>
+        <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-md mx-auto">
+          The page you're looking for doesn't exist or has been moved.
+        </p>
+        <Link 
+          to="/"
+          className="btn-primary inline-block"
+        >
           Return to Home
-        </a>
+        </Link>
       </div>
-    </div>
+    </PublicLayout>
   );
 };
 
