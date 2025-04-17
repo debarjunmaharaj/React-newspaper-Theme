@@ -7,6 +7,7 @@ import { formatDate } from '@/lib/utils';
 import { ArticleView } from '@/components/Articles/ArticleView';
 import { Facebook, Twitter, Linkedin, Mail, Printer, User, Calendar, Eye } from 'lucide-react';
 
+
 const Article = () => {
   const { slug } = useParams<{ slug: string }>();
   const { getArticle, categories, articles } = useSite();
