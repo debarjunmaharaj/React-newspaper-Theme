@@ -14,6 +14,7 @@ const Category = () => {
   const [articles, setArticles] = useState<any[]>([]);
   const [relatedCategories, setRelatedCategories] = useState<any[]>([]);
 
+  
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const articlesPerPage = 10;
